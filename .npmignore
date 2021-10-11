@@ -1,0 +1,19 @@
+# dot_env
+.env
+.env.*
+
+# nyc
+.nyc_output
+coverage
+.codeclimate.yml
+.nycrc.json
+
+# docs
+docs
+.temp
+
+test
+.mocharc.js
+
+.github
+.vscode
