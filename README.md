@@ -1,6 +1,6 @@
 # object-replace-mustache
 
-[![npm](https://img.shields.io/npm/v/object-replace-mustache)](https://www.npmjs.com/package/xxx)
+[![npm](https://img.shields.io/npm/v/object-replace-mustache)](https://www.npmjs.com/package/object-replace-mustache)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/fratzinger/object-replace-mustache/Node.js%20CI)](https://github.com/fratzinger/object-replace-mustache/actions/workflows/node.js.yml?query=branch%3Amain++)
 [![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/fratzinger/object-replace-mustache)](https://codeclimate.com/github/fratzinger/object-replace-mustache)
 [![Code Climate coverage](https://img.shields.io/codeclimate/coverage/fratzinger/object-replace-mustache)](https://codeclimate.com/github/fratzinger/object-replace-mustache)
