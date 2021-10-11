@@ -1,6 +1,6 @@
 {
   "name": "object-replace-mustache",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "replace placeholders of an object with a view like you would use mustache.render for strings",
   "author": "fratzinger",
   "homepage": "",
