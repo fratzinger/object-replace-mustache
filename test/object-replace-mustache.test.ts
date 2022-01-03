@@ -94,4 +94,38 @@ describe("replace", function() {
       assert.deepStrictEqual(transformed, { test: true }, "array item changed");
     });
   });
+
+  describe("string", function() {
+    it("does not change string", function() {
+      const transformed = replace("test", { test: false });
+      assert.deepStrictEqual(transformed, "test", "string hasn't changed");
+    });
+
+    it("changes string with boolean", function() {
+      const transformed = replace("{{ test }}", { test: true });
+      assert.deepStrictEqual(transformed, true, "item changed");
+    });
+
+    it("changes string with number", function() {
+      const transformed = replace("{{ test }}", { test: 1 });
+      assert.deepStrictEqual(transformed, 1, "item changed");
+    });
+
+    it("changes string with string", function() {
+      const transformed = replace("{{ test }}", { test: "no" });
+      assert.deepStrictEqual(transformed, "no", "item changed");
+    });
+
+    it("changes string with object", function() {
+      const transformed = replace("{{ test }}", { test: { hello: "world" } });
+      assert.deepStrictEqual(transformed, { hello: "world" }, "item changed");
+    });
+  });
+
+  describe("number", function() {
+    it("does not change number", function() {
+      const transformed = replace(1, { test: false });
+      assert.deepStrictEqual(transformed, 1, "number hasn't changed");
+    });
+  });
 });

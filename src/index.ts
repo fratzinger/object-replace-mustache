@@ -1,8 +1,9 @@
-import orm from "./object-replace-mustache";
+import replace from "./object-replace-mustache";
 export * from "./types";
 
-export default orm;
+export default replace;
 
 if (typeof module !== "undefined") {
-    module.exports = Object.assign(orm, module.exports);
-  }
+  exports.default = replace;
+  //module.exports = Object.assign(replace, module.exports);
+}

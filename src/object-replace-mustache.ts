@@ -9,9 +9,9 @@ const defaultOptions: Required<ObjectReplaceMustacheOptions> = {
   clone: true
 }
 
-const replace = <T extends Record<string, any>>(
+const replace = <T extends Record<string, any> | any>(
     item: T,
-    view: Record<string, unknown>,
+    view: Record<string, any>,
     _options?: Partial<ObjectReplaceMustacheOptions>
 ): T => {
   const options = Object.assign({}, defaultOptions, _options);
@@ -28,10 +28,10 @@ const replace = <T extends Record<string, any>>(
 
 const recursiveReplace = <T>(
   item: T, 
-  view: Record<string, unknown>, 
-  root?: unknown,
+  view: Record<string, any>, 
+  root?: any,
   path?: string[]
-): T => {
+): any => {
   if (!root) { root = item; }
   if (!path) { path = []; }
   if (typeof item === "string") {
@@ -39,8 +39,12 @@ const recursiveReplace = <T>(
 
     if (key && _has(view, key)) {
       const val = _get(view, key);
-      //@ts-expect-error typing of root
-      _set(root, path, val);
+      
+      if (path.length) {
+        _set(root, path, val);
+      } else {
+        return val;
+      }
     }
 
     return item;
@@ -76,43 +80,4 @@ const getMustacheKey = (
   return keys[0];
 };
 
-/*export const hasMustacheKey = <T>(
-  item: T, 
-  testKey: string, 
-  root?: unknown,
-  path?: string[]
-): boolean => {
-  if (!root) { root = item; }
-  if (!path) { path = []; }
-  if (typeof item === "string") {
-    if (!item.startsWith("{{") || !item.endsWith("}}")) {
-      return false;
-    }
-
-    const key = getMustacheKey(item);
-
-    if (key && (key === testKey || key.startsWith(`${testKey}.`))) {
-      return true;
-    } else {
-      return false;
-    }
-  } else if (_isPlainObject(item)) {
-    for (const key in item) {
-      const hasKey = hasMustacheKey(item[key], testKey, root, [...path, key]);
-      if (hasKey) { return true; }
-    }
-    return false;
-  } else if (Array.isArray(item)) {
-    item.forEach((subItem, i) => {
-      const hasKey = hasMustacheKey(subItem, testKey, root, [...path, `${i}`]);
-      if (hasKey) { return true; }
-    });
-
-    return false;
-  }
-
-  return false;
-};*/
-
 export default replace;
-
