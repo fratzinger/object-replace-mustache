@@ -172,4 +172,23 @@ describe("replace", function() {
       assert.ok(transformed !== original, "makes a copy");
     });
   })
+
+  describe("other values", function() {
+    it("works with 'null'", function() {
+      const transformed = replace(null, { test: false });
+      assert.deepStrictEqual(transformed, null, "is null");
+    });
+
+    it("works with 'undefined'", function() {
+      const transformed = replace(undefined, { test: false });
+      assert.deepStrictEqual(transformed, undefined, "is undefined");
+    });
+
+    it("works with Date", function() {
+      const date = new Date();
+      const transformed = replace(date, { test: false });
+      assert.deepStrictEqual(transformed, date, "is Date");
+      assert.ok(transformed !== date, "copies date");
+    });
+  })
 });
