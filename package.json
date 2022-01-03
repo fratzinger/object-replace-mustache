@@ -21,6 +21,14 @@
     "test": "test",
     "src": "src"
   },
+  "files": [
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md",
+    "src/**",
+    "lib/**",
+    "dist/**"
+  ],
   "scripts": {
     "build": "shx rm -rf dist/ && tsc",
     "version": "npm run build",
