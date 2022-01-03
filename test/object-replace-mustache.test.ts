@@ -128,4 +128,48 @@ describe("replace", function() {
       assert.deepStrictEqual(transformed, 1, "number hasn't changed");
     });
   });
+
+  describe("array", function() {
+    it("handles empty array", function() {
+      const original = [];
+      const transformed = replace(original, { test: false });
+      assert.deepStrictEqual(transformed, [], "empty array doesn't change");
+      assert.ok(transformed !== original, "makes a copy");
+    });
+
+    it("handles array of values", function() {
+      const original = [
+        "{{ test }}",
+        "test",
+        1,
+        {
+          test: "{{ test }}",
+          arr: [
+            "{{ test }}",
+            "test",
+            1,
+            { test: "{{ test }}" }
+          ]
+        }
+      ];
+
+      const expected = [
+        true,
+        "test",
+        1,
+        {
+          test: true,
+          arr: [
+            true,
+            "test",
+            1,
+            { test: true }
+          ]
+        }
+      ]
+      const transformed = replace(original, { test: true });
+      assert.deepStrictEqual(transformed, expected, "transforms array");
+      assert.ok(transformed !== original, "makes a copy");
+    });
+  })
 });

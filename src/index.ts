@@ -4,6 +4,5 @@ export * from "./types";
 export default replace;
 
 if (typeof module !== "undefined") {
-  exports.default = replace;
-  //module.exports = Object.assign(replace, module.exports);
+  module.exports = Object.assign(replace, module.exports);
 }
