@@ -33,13 +33,6 @@ describe("object", function () {
     assert.deepStrictEqual(transformed, { test: true }, "item changed");
   });
 
-  it("overwrites item with clone: false", function () {
-    const original = { test: "{{ test }}" };
-    const transformed = replace(original, { test: true }, { clone: false });
-    assert.deepStrictEqual(original, { test: true }, "original changed");
-    assert.deepStrictEqual(transformed, { test: true }, "item changed");
-  });
-
   it("doesn't change item with mustache not starting", function () {
     const transformed = replace(
       {
@@ -200,6 +193,5 @@ describe("other values", function () {
     const date = new Date();
     const transformed = replace(date, { test: false });
     assert.deepStrictEqual(transformed, date, "is Date");
-    assert.ok(transformed !== date, "copies date");
   });
 });

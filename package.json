@@ -42,10 +42,7 @@
     "coverage": "vitest run --coverage",
     "lint": "eslint \"{src,test}/**/*{.js,.ts}\" --ext .js,.ts"
   },
-  "dependencies": {
-    "fast-copy": "^3.0.1",
-    "lodash": "^4.17.21"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.16",
