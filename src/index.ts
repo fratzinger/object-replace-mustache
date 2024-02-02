@@ -1,2 +1,3 @@
-export * from "./object-replace";
-export * from "./string-replace";
+export * from "./replace-object";
+export * from "./replace-string";
+export * from "./render";

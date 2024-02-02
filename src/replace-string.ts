@@ -1,5 +1,8 @@
 // shamelessly taken from https://github.com/vuejs/core/blob/main/packages/compiler-core/src/validateExpression.ts
 // these keywords should not appear inside expressions, but operators like
+
+import { regexForDelimiters } from "./utils";
+
 // 'typeof', 'instanceof', and 'in' are allowed
 const prohibitedKeywordRE = new RegExp(
   "\\b" +
@@ -27,6 +30,11 @@ const stripStringRE =
 const whitelistNamespaces: string[] = [];
 
 export type ReplaceTemplateStringOptions = {
+  /**
+   * Specify the delimiters
+   *
+   * @default ['{{', '}}']
+   */
   delimiters?: readonly [string, string];
   /**
    * Whether to throw an error when an error occurs or return the original string
@@ -35,10 +43,6 @@ export type ReplaceTemplateStringOptions = {
    */
   handleError?: "throw" | "ignore";
 };
-
-function escapeRegExp(string: string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
-}
 
 const defineReplaceTemplateString =
   (options: ReplaceTemplateStringOptions) =>
@@ -50,13 +54,9 @@ export const replaceString = (
   view = {},
   options?: ReplaceTemplateStringOptions,
 ): unknown => {
-  const { delimiters = ["${", "}"] } = options ?? {};
-
-  const regex = new RegExp(
-    `^${escapeRegExp(delimiters[0])}(.*?)${escapeRegExp(delimiters[1])}$`,
-  );
-
-  const expression = regex.exec(template)?.[1];
+  const expression = regexForDelimiters(
+    options?.delimiters ?? ["{{", "}}"],
+  ).exec(template)?.[1];
 
   if (!expression) {
     return template;

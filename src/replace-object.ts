@@ -1,5 +1,5 @@
 import { isPlainObject } from "./utils";
-import { replaceString } from "./string-replace";
+import { replaceString } from "./replace-string";
 
 export interface ObjectReplaceOptions {
   /**

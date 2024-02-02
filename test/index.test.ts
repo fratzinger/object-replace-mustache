@@ -9,6 +9,7 @@ describe("index", function () {
         "replace",
         "replaceString",
         "delimiters",
+        "render",
         "replaceStringMustache",
         "replaceStringEjs",
       ].sort(),
