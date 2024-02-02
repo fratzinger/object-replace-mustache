@@ -9,8 +9,8 @@ describe("index", function () {
         "replace",
         "replaceString",
         "delimiters",
-        "replaceMustache",
-        "replaceEjs",
+        "replaceStringMustache",
+        "replaceStringEjs",
       ].sort(),
     );
   });

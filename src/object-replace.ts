@@ -35,7 +35,6 @@ const recursiveReplace = <T>(
     }
     return result;
   } else if (Array.isArray(item)) {
-    console.log([...item.map((subItem) => recursiveReplace(subItem, view))]);
     return [...item.map((subItem) => recursiveReplace(subItem, view))];
   }
 
