@@ -17,6 +17,15 @@ const prohibitedKeywordRE = new RegExp(
 const stripStringRE =
   /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\]|\\.)*`|`(?:[^`\\]|\\.)*`/g;
 
+/**
+ * possible values:
+ *
+ * - "JSON": JSON.stringify
+ * - "Object": Object.keys
+ * - "Array": Array.isArray
+ */
+const whitelistNamespaces: string[] = [];
+
 export type ReplaceTemplateStringOptions = {
   delimiters?: readonly [string, string];
   /**
@@ -120,7 +129,7 @@ export const replaceString = (
   const allowedVariables = Object.keys(view);
 
   const notAllowedVariables = accessedVariableNames.filter(
-    (x) => !allowedVariables.includes(x),
+    (x) => !allowedVariables.includes(x) && !whitelistNamespaces.includes(x),
   );
 
   if (notAllowedVariables.length) {
