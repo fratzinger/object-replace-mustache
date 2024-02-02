@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { replace } from "../src";
 
-describe("object-replace.test.ts", () => {
+describe("replace-object.test.ts", () => {
   describe("object", function () {
     it("doesn't change item", function () {
       const transformed = replace(

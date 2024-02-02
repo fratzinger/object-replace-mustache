@@ -19,7 +19,7 @@ npm i object-replace-mustache
 ## Usage
 
 ```ts
-import replace from 'object-replace-mustache'
+import { replace } from 'object-replace-mustache'
 
 const original = { isTest: '{{ nested.test }}' };
 
@@ -28,6 +28,18 @@ const view = { nested: { test: true } }
 const transformed = replace(original, view);
 console.log(transformed)
 // { isTest: true }
+```
+
+### render
+
+There is also a `render` function that is like mustache.js or handlebars
+
+```ts
+import { render } from 'object-replace-mustache'
+
+const rendered = render('hello { test }!', { test: 'world' })
+console.log(rendered);
+// hello world!
 ```
 
 ## Testing

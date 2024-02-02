@@ -1,25 +1,25 @@
 import { replaceStringMustache, replaceString, replaceStringEjs } from "../src";
 
-describe("string-replace.test.ts", () => {
-  it("should replace template string that does not start with ${", () => {
+describe("replace-string.test.ts", () => {
+  it("should replace template string that does not start with {{", () => {
     expect(
-      replaceString(" ${name}", {
+      replaceString(" {{name}}", {
         name: "world",
       }),
-    ).toBe(" ${name}");
+    ).toBe(" {{name}}");
   });
 
   it("should replace template string that does not end with }", () => {
     expect(
-      replaceString("${name} ", {
+      replaceString("{{name}} ", {
         name: "world",
       }),
-    ).toBe("${name} ");
+    ).toBe("{{name}} ");
   });
 
   it("should replace template string", () => {
     expect(
-      replaceString("${name}", {
+      replaceString("{{name}}", {
         name: "world",
       }),
     ).toBe("world");
@@ -27,7 +27,7 @@ describe("string-replace.test.ts", () => {
 
   it("should replace template string with whitespaces inside", () => {
     expect(
-      replaceString("${ name }", {
+      replaceString("{{ name }}", {
         name: "world",
       }),
     ).toBe("world");
@@ -35,7 +35,7 @@ describe("string-replace.test.ts", () => {
 
   it("should replace template string with nested context", () => {
     expect(
-      replaceString("${name.world}", {
+      replaceString("{{name.world}}", {
         name: {
           world: "hello",
         },
@@ -44,7 +44,7 @@ describe("string-replace.test.ts", () => {
   });
 
   it("throws with nested expression", () => {
-    expect(() => replaceString("${ 'a' + ${'b'} }")).toThrowError(
+    expect(() => replaceString("{{ 'a' + ${'b'} }}")).toThrowError(
       "nested expression is not allowed in template string",
     );
   });
@@ -52,7 +52,7 @@ describe("string-replace.test.ts", () => {
   describe("access to variables not defined in view", () => {
     it("should not pass current scope", () => {
       const test1 = "test";
-      expect(() => replaceString("${test1}", {})).toThrowError(
+      expect(() => replaceString("{{test1}}", {})).toThrowError(
         "test1 is not defined",
       );
     });
@@ -60,35 +60,35 @@ describe("string-replace.test.ts", () => {
 
   it("should throw with console", () => {
     expect(
-      () => replaceString('${console.log("test")}', {}),
+      () => replaceString('{{console.log("test")}}', {}),
       "at the beginning",
     ).toThrowError("console is not defined");
     expect(
-      () => replaceString("${1+console.log()}", {}),
+      () => replaceString("{{1+console.log()}}", {}),
       "after operator",
     ).toThrowError("console is not defined");
 
     expect(
-      () => replaceString("${1 - console.log()}", {}),
+      () => replaceString("{{1 - console.log()}}", {}),
       "after whitespace",
     ).toThrowError("console is not defined");
   });
 
   it("should pass with explicit console", () => {
     expect(
-      replaceString('${console.log("test")}', { console }),
+      replaceString('{{console.log("test")}}', { console }),
     ).toBeUndefined();
   });
 
   it("should throw with 'this'", () => {
-    expect(() => replaceString("${this}", {})).toThrowError(
+    expect(() => replaceString("{{this}}", {})).toThrowError(
       "this is not defined",
     );
   });
 
   it("should throw with 'Object'", () => {
     expect(() =>
-      replaceString("${Object.keys(a)}", { a: { test: 1, test1: 2 } }),
+      replaceString("{{Object.keys(a)}}", { a: { test: 1, test1: 2 } }),
     ).toThrowError("Object is not defined");
   });
 
@@ -111,22 +111,23 @@ describe("string-replace.test.ts", () => {
         "??=",
       ];
 
-      expect(() => replaceString("${a=2*2}", { a: 3 })).toThrowError(
+      expect(() => replaceString("{{a=2*2}}", { a: 3 })).toThrowError(
         "assignment is not allowed in template string",
       );
 
       unallowed.forEach((x) => {
-        expect(() => replaceString("${a" + x + "2}", { a: 3 }), x).toThrowError(
-          "assignment is not allowed in template string",
-        );
+        expect(
+          () => replaceString("{{a" + x + "2}}", { a: 3 }),
+          x,
+        ).toThrowError("assignment is not allowed in template string");
       });
     });
 
     it("should throw with '++' and '--'", () => {
-      expect(() => replaceString("${a++}", { a: 3 })).toThrowError(
+      expect(() => replaceString("{{a++}}", { a: 3 })).toThrowError(
         "assignment is not allowed in template string",
       );
-      expect(() => replaceString("${a--}", { a: 3 })).toThrowError(
+      expect(() => replaceString("{{a--}}", { a: 3 })).toThrowError(
         "assignment is not allowed in template string",
       );
     });
@@ -135,12 +136,14 @@ describe("string-replace.test.ts", () => {
       const allowed = ["==", "!=", "===", "!==", ">", "<", ">=", "<="];
 
       allowed.forEach((x) => {
-        expect(replaceString("${a" + x + "2}", { a: 3 })).toBeTypeOf("boolean");
+        expect(replaceString("{{a" + x + "2}}", { a: 3 })).toBeTypeOf(
+          "boolean",
+        );
       });
     });
 
     it("should throw with arrow function", () => {
-      expect(() => replaceString("${() => true}", { a: 3 })).toThrowError(
+      expect(() => replaceString("{{() => true}}", { a: 3 })).toThrowError(
         "arrow function is not allowed in template string",
       );
     });
@@ -148,7 +151,7 @@ describe("string-replace.test.ts", () => {
 
   it("should work with expressions", () => {
     expect(
-      replaceString("${name.toUpperCase()}", {
+      replaceString("{{name.toUpperCase()}}", {
         name: "world",
       }),
     ).toBe("WORLD");
@@ -156,7 +159,7 @@ describe("string-replace.test.ts", () => {
 
   it("should replace number", () => {
     expect(
-      replaceString("${name}", {
+      replaceString("{{name}}", {
         name: 2,
       }),
     ).toBe(2);
@@ -164,12 +167,12 @@ describe("string-replace.test.ts", () => {
 
   it("replaced object should be the exact same object", () => {
     const obj = { a: 1 };
-    expect(replaceString("${obj}", { obj })).toBe(obj);
+    expect(replaceString("{{obj}}", { obj })).toBe(obj);
   });
 
   describe("reserved keywords", () => {
     it("should throw with 'arguments'", () => {
-      expect(() => replaceString("${arguments}", {})).toThrowError(
+      expect(() => replaceString("{{arguments}}", {})).toThrowError(
         "arguments is not allowed in template string",
       );
     });
@@ -177,7 +180,7 @@ describe("string-replace.test.ts", () => {
     it("should throw with prohibited keywords", () => {
       expect(
         () =>
-          replaceString("${await name}", {
+          replaceString("{{await name}}", {
             name: "world",
           }),
         "without operator",
@@ -185,7 +188,7 @@ describe("string-replace.test.ts", () => {
 
       expect(
         () =>
-          replaceString("${2+await name}", {
+          replaceString("{{2+await name}}", {
             name: "world",
           }),
         "with operator",
