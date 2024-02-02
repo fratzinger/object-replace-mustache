@@ -35,7 +35,7 @@ export type ReplaceTemplateStringOptions = {
    *
    * @default ['{{', '}}']
    */
-  delimiters?: readonly [string, string];
+  delimiters?: [string, string];
   /**
    * Whether to throw an error when an error occurs or return the original string
    *
@@ -151,9 +151,9 @@ export const delimiters = {
 } as const;
 
 export const replaceStringMustache = defineReplaceTemplateString({
-  delimiters: delimiters.mustache,
+  delimiters: delimiters.mustache as any,
 });
 
 export const replaceStringEjs = defineReplaceTemplateString({
-  delimiters: delimiters.ejs,
+  delimiters: delimiters.ejs as any,
 });
