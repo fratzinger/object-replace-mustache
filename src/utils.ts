@@ -14,8 +14,3 @@ export const regexForDelimiters = (
     flags,
   );
 };
-
-export const regexMustache = (flags?: string) =>
-  regexForDelimiters(["{{", "}}"], flags);
-export const regexTemplateString = (flags?: string) =>
-  regexForDelimiters(["${", "}"], flags);
