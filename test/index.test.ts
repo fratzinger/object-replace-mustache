@@ -1,12 +1,17 @@
-import assert from "assert";
-import omr, { ObjectReplaceMustacheOptions } from "../src/index";
+import * as src from "../src";
 
-describe("index", function() {
-  it("exports all members", function() {
-    assert.ok(omr);
-    const options: ObjectReplaceMustacheOptions = {
-      clone: true
-    }
-    assert.ok(options);
+describe("index", function () {
+  it("exports all members", function () {
+    const members = Object.keys(src).sort();
+    assert.deepStrictEqual(
+      members,
+      [
+        "replace",
+        "replaceString",
+        "delimiters",
+        "replaceMustache",
+        "replaceEjs",
+      ].sort(),
+    );
   });
 });
