@@ -1,6 +1,10 @@
 import { render } from "../src/render";
 
 describe("render.test.ts", () => {
+  it("is silent by default", () => {
+    expect(render("Hello {{ test }}", {})).toStrictEqual("Hello {{ test }}");
+  });
+
   it("should work with multiple replaces", () => {
     expect(
       render("Hello {{ test }}, here {{ who }} am!", {
