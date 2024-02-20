@@ -27,7 +27,27 @@ const stripStringRE =
  * - "Object": Object.keys
  * - "Array": Array.isArray
  */
-const whitelistNamespaces: string[] = [];
+const whitelistNamespaces: string[] = [
+  "true",
+  "false",
+  "null",
+  "undefined",
+  "typeof",
+  "instanceof",
+  "in",
+  "String",
+  "Number",
+  "Boolean",
+  "Symbol",
+  "BigInt",
+  "JSON",
+  "Object",
+  "Array",
+  "Math",
+  "Date",
+  "RegExp",
+  "Error",
+];
 
 export type ReplaceTemplateStringOptions = {
   /**
@@ -62,9 +82,9 @@ export const replaceString = (
     return template;
   }
 
-  function silentOrThrow(message: string) {
+  function silentOrThrow(err: string | Error) {
     if (options?.handleError !== "ignore") {
-      throw new Error(message);
+      throw typeof err === "string" ? new Error(err) : err;
     }
 
     return template;
@@ -136,13 +156,17 @@ export const replaceString = (
     return silentOrThrow(`${notAllowedVariables.join(", ")} is not defined`);
   }
 
-  return new Function(
-    "view",
-    /* js */ `
-      const tagged = ( ${allowedVariables.join(", ")} ) => ${expression}
-      return tagged(...Object.values(view))
-    `,
-  )(view);
+  try {
+    return new Function(
+      "view",
+      /* js */ `
+        const tagged = ( ${allowedVariables.join(", ")} ) => ${expression}
+        return tagged(...Object.values(view))
+      `,
+    )(view);
+  } catch (err) {
+    return silentOrThrow(err);
+  }
 };
 
 export const delimiters = {

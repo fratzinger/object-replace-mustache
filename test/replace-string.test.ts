@@ -86,12 +86,6 @@ describe("replace-string.test.ts", () => {
     );
   });
 
-  it("should throw with 'Object'", () => {
-    expect(() =>
-      replaceString("{{Object.keys(a)}}", { a: { test: 1, test1: 2 } }),
-    ).toThrowError("Object is not defined");
-  });
-
   describe("expressions containing '=' / assignment", () => {
     it("should throw with assignment", () => {
       const unallowed = [
@@ -165,6 +159,82 @@ describe("replace-string.test.ts", () => {
     ).toBe(2);
   });
 
+  it("should replace comparison", () => {
+    expect(
+      replaceString("{{2>1}}", {
+        name: 2,
+      }),
+    ).toBe(true);
+  });
+
+  it("should replace comparison object", () => {
+    expect(
+      replaceString("{{ nested.object === true }}", {
+        nested: { object: true },
+      }),
+    ).toBe(true);
+
+    expect(
+      replaceString("{{ nested.object === false }}", {
+        nested: { object: false },
+      }),
+    ).toBe(true);
+
+    expect(
+      replaceString("{{ nested.object !== false }}", {
+        nested: { object: true },
+      }),
+    ).toBe(true);
+
+    expect(
+      replaceString("{{ nested.object === null }}", {
+        nested: { object: null },
+      }),
+    ).toBe(true);
+
+    expect(
+      replaceString("{{ !nested?.deep?.object }}", {
+        nested: { deep: undefined },
+      }),
+    ).toBe(true);
+
+    expect(
+      replaceString("{{ nested?.deep?.object === undefined }}", {
+        nested: { deep: undefined },
+      }),
+    ).toBe(true);
+  });
+
+  it("should work with typeof", () => {
+    expect(
+      replaceString("{{typeof name}}", {
+        name: "world",
+      }),
+    ).toBe("string");
+  });
+
+  it("should work with instanceof", () => {
+    expect(
+      replaceString("{{name instanceof String}}", {
+        name: "world",
+      }),
+    ).toBe(false);
+  });
+
+  it("should work with in", () => {
+    expect(
+      replaceString("{{'name' in obj}}", {
+        obj: { name: "test" },
+      }),
+    ).toBe(true);
+  });
+
+  it("should work with 'Object'", () => {
+    expect(
+      replaceString("{{Object.keys(a)}}", { a: { test: 1, test1: 2 } }),
+    ).toStrictEqual(["test", "test1"]);
+  });
+
   it("replaced object should be the exact same object", () => {
     const obj = { a: 1 };
     expect(replaceString("{{obj}}", { obj })).toBe(obj);
@@ -193,6 +263,36 @@ describe("replace-string.test.ts", () => {
           }),
         "with operator",
       ).toThrowError("await is not allowed in template string");
+    });
+  });
+
+  describe("error handling", () => {
+    it("should throw cannot read properties of undefined", () => {
+      expect(() =>
+        replaceString(
+          "{{ nested.object === true }}",
+          { nested: undefined },
+          { handleError: "throw" },
+        ),
+      ).toThrowError("Cannot read properties of undefined (reading 'object')");
+    });
+
+    it("should ignore cannot read properties of undefined", () => {
+      expect(
+        replaceString(
+          "{{ nested.object === true }}",
+          { nested: undefined },
+          { handleError: "ignore" },
+        ),
+      ).toBe("{{ nested.object === true }}");
+
+      expect(() =>
+        replaceString(
+          "{{ nested.object === true }}",
+          { nested: undefined },
+          { handleError: "throw" },
+        ),
+      ).toThrowError();
     });
   });
 
