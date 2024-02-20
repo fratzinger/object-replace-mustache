@@ -164,7 +164,7 @@ export const replaceString = (
         return tagged(...Object.values(view))
       `,
     )(view);
-  } catch (err) {
+  } catch (err: any) {
     return silentOrThrow(err);
   }
 };
