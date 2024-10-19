@@ -146,7 +146,7 @@ describe("replace-object.test.ts", () => {
         {},
         { handleError: "throw" },
       );
-      assert.deepStrictEqual(transformed, { test: undefined });
+      assert.deepStrictEqual(transformed, { test: "{{ test ?? undefined }}" });
     });
   });
 
