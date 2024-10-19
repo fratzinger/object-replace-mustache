@@ -8,6 +8,12 @@ export interface ObjectReplaceOptions {
    * @default ["{{", "}}"]
    */
   delimiters?: [string, string];
+  /**
+   * Whether to throw or ignore errors.
+   *
+   * @default "ignore"
+   */
+  handleError?: "throw" | "ignore";
 }
 
 export const replace = <T extends Record<string, any>>(
@@ -26,7 +32,7 @@ const recursiveReplace = <T>(
   if (typeof item === "string") {
     return replaceString(item, view, {
       delimiters: options?.delimiters ?? ["{{", "}}"],
-      handleError: "ignore",
+      handleError: options?.handleError ?? "ignore",
     });
   } else if (isPlainObject(item)) {
     const result: Record<string, any> = {};

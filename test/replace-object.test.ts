@@ -137,6 +137,17 @@ describe("replace-object.test.ts", () => {
       );
       assert.deepStrictEqual(transformed, { test: true }, "array item changed");
     });
+
+    it("fallback if not defined", function () {
+      const transformed = replace(
+        {
+          test: "{{ test ?? undefined }}",
+        },
+        {},
+        { handleError: "throw" },
+      );
+      assert.deepStrictEqual(transformed, { test: undefined });
+    });
   });
 
   describe("number", function () {

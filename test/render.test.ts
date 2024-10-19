@@ -31,4 +31,29 @@ describe("render.test.ts", () => {
       }),
     ).toStrictEqual("Hello 4, how are you?");
   });
+
+  it("should work with square brackets", () => {
+    expect(
+      render("Hello {{ test[0] }}!", {
+        test: ["world"],
+      }),
+    ).toStrictEqual("Hello world!");
+  });
+
+  it("should work with square brackets for objects", () => {
+    expect(
+      render("Hello {{ test[yourName] }}!", {
+        test: { name: "world" },
+        yourName: "name",
+      }),
+    ).toStrictEqual("Hello world!");
+  });
+
+  it("should work with Math.min", () => {
+    expect(
+      render("Hello {{ Math.min(1, 2) }}!", {
+        Math,
+      }),
+    ).toStrictEqual("Hello 1!");
+  });
 });
