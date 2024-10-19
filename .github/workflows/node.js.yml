@@ -11,41 +11,44 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [18.x, 20.x, 22.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: npm test
+      - uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: pnpm ci
+      - run: pnpm test
 
   coverage:
-    needs: [ test ]
+    needs: [test]
     name: coverage
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-node@master
-      with:
-        node-version: '20'
-    - run: npm ci
-    - uses: paambaati/codeclimate-action@v2.7.5
-      env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-      with:
-        coverageCommand: npm run coverage
+      - uses: actions/checkout@master
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@master
+        with:
+          node-version: "20"
+      - run: pnpm ci
+      - uses: paambaati/codeclimate-action@v2.7.5
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          coverageCommand: pnpm run coverage
 
   build:
     name: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@master
         with:
           node-version: "20"
-      - run: npm i
-      - run: npm run build
+      - run: pnpm ci
+      - run: pnpm run build
