@@ -15,13 +15,13 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - run: pnpm ci
+      - run: pnpm i
       - run: pnpm test
 
   coverage:
@@ -29,13 +29,13 @@ jobs:
     name: coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@master
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: pnpm ci
-      - uses: paambaati/codeclimate-action@v2.7.5
+      - run: pnpm i
+      - uses: paambaati/codeclimate-action@v9
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
@@ -45,10 +45,10 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@master
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: pnpm ci
+      - run: pnpm i
       - run: pnpm run build
