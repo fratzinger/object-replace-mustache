@@ -243,18 +243,15 @@ describe("replace-string.test.ts", () => {
   });
 
   it("Array.reduce", () => {
-    const obj = { a: [1, 2, 3] };
-    expect(replaceString("{{a.reduce((a,b) => a+b, 0)}}", obj)).toBe(6);
+    expect(replaceString("{{a.reduce((a,b) => a+b, 0)}}", { a: [1, 2, 3] })).toBe(6);
   });
 
   it("Array.map", () => {
-    const obj = { a: [1, 2, 3] };
-    expect(replaceString("{{a.map(x => x*2)}}", obj)).toStrictEqual([2, 4, 6]);
+    expect(replaceString("{{a.map(x => x*2)}}", { a: [1, 2, 3] })).toStrictEqual([2, 4, 6]);
   });
 
   it("Array.filter", () => {
-    const obj = { a: [1, 2, 3] };
-    expect(replaceString("{{a.filter(x => x>1)}}", obj)).toStrictEqual([2, 3]);
+    expect(replaceString("{{a.filter(x => x>1)}}", { a: [1, 2, 3] })).toStrictEqual([2, 3]);
   });
 
   describe("reserved keywords", () => {
