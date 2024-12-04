@@ -257,6 +257,19 @@ describe("replace-string.test.ts", () => {
     expect(replaceString("{{a.filter(x => x>1)}}", { a: [1, 2, 3] })).toStrictEqual([2, 3]);
   });
 
+  it("_.numberFormat", () => {
+    const context= {
+      data: {},
+      _: {
+        numberFormat: (value = 0, options = {}) => new Intl.NumberFormat('de-DE', options).format(value),
+      }
+    }
+    const template = "{{ _.numberFormat(data?.material?.reduce((acc, item) => acc + (item.amount ?? 0), 0) ?? 0, { style: 'currency', currency: 'EUR' }) }}";
+
+    // https://stackoverflow.com/questions/2132348/what-does-char-160-mean-in-my-source-code
+    expect(replaceString(template, context)).toStrictEqual(`0,00${String.fromCharCode(160)}€`);
+  })
+
   describe("reserved keywords", () => {
     it("should throw with 'arguments'", () => {
       expect(() => replaceString("{{arguments}}", {})).toThrowError(
