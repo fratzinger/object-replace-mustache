@@ -244,6 +244,9 @@ describe("replace-string.test.ts", () => {
 
   it("Array.reduce", () => {
     expect(replaceString("{{a.reduce((a,b) => a+b, 0)}}", { a: [1, 2, 3] })).toBe(6);
+
+    expect(replaceString("{{ data?.material?.reduce((acc, item) => acc + (item.amount ?? 0), 0) ?? 0 }}", {data: {} })).toBe(0);
+    expect(replaceString("{{ data?.material?.reduce((acc, item) => acc + (item.amount ?? 0), 0) ?? 0 }}", { data: { material: [{ amount: 1 }, { amount: 2 }] } })).toBe(3);
   });
 
   it("Array.map", () => {
