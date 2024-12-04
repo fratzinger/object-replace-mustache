@@ -69,13 +69,14 @@ const defineReplaceTemplateString =
     (template: string, view = {}) =>
       replaceString(template, view, options);
 
-const callbackParamsRegex = /\(([^)]*)\)\s*=>|(\w+)\s*=>/;
+const callbackParamsRegex = /(?:\(([^)]*)\)|\s*(\w+))\s*=>/;
 
 function extractCallbackParams(functionString: string) {
   const match = functionString.match(callbackParamsRegex);
   return match 
-    ? (match[1] ? match[1].split(',').map(param => param.trim()).filter(Boolean) 
-                : [match[2]])
+    ? (match[1] 
+        ? match[1].split(',').map(param => param.trim().replace(/^\(|\)$/g, '')).filter(Boolean)
+        : [match[2]])
     : [];
 }
 
