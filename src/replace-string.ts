@@ -69,6 +69,16 @@ const defineReplaceTemplateString =
     (template: string, view = {}) =>
       replaceString(template, view, options);
 
+const callbackParamsRegex = /\(([^)]*)\)\s*=>|(\w+)\s*=>/;
+
+function extractCallbackParams(functionString: string) {
+  const match = functionString.match(callbackParamsRegex);
+  return match 
+    ? (match[1] ? match[1].split(',').map(param => param.trim()).filter(Boolean) 
+                : [match[2]])
+    : [];
+}
+
 export const replaceString = (
   template: string,
   view = {},
@@ -114,11 +124,7 @@ export const replaceString = (
       return silentOrThrow("assignment is not allowed in template string");
     }
 
-    const strippedCompare = withoutStrings.replace(/!==|===|==|!=|>=|<=/g, "");
-
-    if (strippedCompare.includes("=>")) {
-      return silentOrThrow("arrow function is not allowed in template string");
-    }
+    const strippedCompare = withoutStrings.replace(/!==|===|==|!=|>=|<=|=>/g, "");
 
     if (strippedCompare.match(/=/g)) {
       return silentOrThrow("assignment is not allowed in template string");
@@ -148,8 +154,10 @@ export const replaceString = (
 
   const allowedVariables = Object.keys(view);
 
-  const notAllowedVariables = accessedVariableNames.filter(
-    (x) => !allowedVariables.includes(x) && !whitelistNamespaces.includes(x),
+  const functionParams = extractCallbackParams(expression);
+
+  let notAllowedVariables = accessedVariableNames.filter(
+    (x) => !allowedVariables.includes(x) && !whitelistNamespaces.includes(x) && !functionParams.includes(x),
   );
 
   if (notAllowedVariables.length) {

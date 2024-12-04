@@ -136,10 +136,8 @@ describe("replace-string.test.ts", () => {
       });
     });
 
-    it("should throw with arrow function", () => {
-      expect(() => replaceString("{{() => true}}", { a: 3 })).toThrowError(
-        "arrow function is not allowed in template string",
-      );
+    it("function", () => {
+      expect(() => replaceString("{{() => true}}", { a: 3 })).toBeTypeOf("function");
     });
   });
 
@@ -238,6 +236,25 @@ describe("replace-string.test.ts", () => {
   it("replaced object should be the exact same object", () => {
     const obj = { a: 1 };
     expect(replaceString("{{obj}}", { obj })).toBe(obj);
+  });
+
+  it("Object.keys", () => {
+    expect(replaceString("{{Object.keys(a)}}", { a: { test: 1 } })).toStrictEqual(["test"]);
+  });
+
+  it("Array.reduce", () => {
+    const obj = { a: [1, 2, 3] };
+    expect(replaceString("{{a.reduce((a,b) => a+b, 0)}}", obj)).toBe(6);
+  });
+
+  it("Array.map", () => {
+    const obj = { a: [1, 2, 3] };
+    expect(replaceString("{{a.map(x => x*2)}}", obj)).toStrictEqual([2, 4, 6]);
+  });
+
+  it("Array.filter", () => {
+    const obj = { a: [1, 2, 3] };
+    expect(replaceString("{{a.filter(x => x>1)}}", obj)).toStrictEqual([2, 3]);
   });
 
   describe("reserved keywords", () => {
