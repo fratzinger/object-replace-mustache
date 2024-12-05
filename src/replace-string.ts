@@ -3,7 +3,7 @@
 
 import { regexForDelimiters } from "./utils";
 import { parse } from "@babel/parser";
-import traverse from "@babel/traverse";
+import { default as traverse } from "@babel/traverse";
 
 // https://astexplorer.net/
 
