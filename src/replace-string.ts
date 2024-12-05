@@ -3,7 +3,9 @@
 
 import { regexForDelimiters } from "./utils";
 import { parse } from "@babel/parser";
-import traverse from "@babel/traverse";
+import _traverse from "@babel/traverse";
+
+const traverse: typeof _traverse = typeof _traverse === "function" ? _traverse : (_traverse as any).default;
 
 // https://astexplorer.net/
 
