@@ -2,7 +2,7 @@
 // these keywords should not appear inside expressions, but operators like
 
 import { regexForDelimiters } from "./utils";
-import parser from "@babel/parser";
+import { parse } from "@babel/parser";
 import traverse from "@babel/traverse";
 
 // https://astexplorer.net/
@@ -122,7 +122,7 @@ export const replaceString = (
     throw new Error(`${keywordMatch} is not allowed in template string`);
   }
 
-  const ast = parser.parse(expression);
+  const ast = parse(expression);
 
   if (ast.errors.length) {
     return silentOrThrow(ast.errors[0].reasonCode);
