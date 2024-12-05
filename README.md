@@ -19,14 +19,14 @@ npm i object-replace-mustache
 ## Usage
 
 ```ts
-import { replace } from 'object-replace-mustache'
+import { replace } from "object-replace-mustache";
 
-const original = { isTest: '{{ nested.test }}' };
+const original = { isTest: "{{ nested.test }}" };
 
-const view = { nested: { test: true } }
+const view = { nested: { test: true } };
 
 const transformed = replace(original, view);
-console.log(transformed)
+console.log(transformed);
 // { isTest: true }
 ```
 
@@ -35,16 +35,16 @@ console.log(transformed)
 There is also a `render` function that is like mustache.js or handlebars
 
 ```ts
-import { render } from 'object-replace-mustache'
+import { render } from "object-replace-mustache";
 
-const rendered = render('hello { test }!', { test: 'world' })
+const rendered = render("hello { test }!", { test: "world" });
 console.log(rendered);
 // hello world!
 ```
 
 ## Testing
 
-Simply run `npm test` and all your tests in the `test/` directory will be run. It has full support for *Visual Studio Code*. You can use the debugger to set breakpoints.
+Simply run `npm test` and all your tests in the `test/` directory will be run. It has full support for _Visual Studio Code_. You can use the debugger to set breakpoints.
 
 ## License
 
