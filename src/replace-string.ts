@@ -2,6 +2,10 @@
 // these keywords should not appear inside expressions, but operators like
 
 import { regexForDelimiters } from "./utils";
+import parser from "@babel/parser";
+import traverse from "@babel/traverse";
+
+// https://astexplorer.net/
 
 // 'typeof', 'instanceof', and 'in' are allowed
 const prohibitedKeywordRE = new RegExp(
@@ -108,11 +112,51 @@ export const replaceString = (
 
   const withoutStrings = expression.replace(stripStringRE, "");
 
+  const allowedVariables = Object.keys(view);
+
+  const unsafeMethods = ["require", "eval", "console", "this", "window", "document", "global", "process", "module", "exports", "self", "globalThis"].filter(x => allowedVariables.indexOf(x) === -1);
+
   const keywordMatch = withoutStrings.match(prohibitedKeywordRE);
 
   if (keywordMatch) {
     throw new Error(`${keywordMatch} is not allowed in template string`);
   }
+
+  const ast = parser.parse(expression);
+
+  if (ast.errors.length) {
+    return silentOrThrow(ast.errors[0].reasonCode);
+  }
+
+  let unsafe: string | boolean = false;
+  traverse(ast, {
+    enter(path) {
+      if (unsafe) {
+        return;
+      }
+
+      const type = path.node.type;
+
+      if (type === "ThisExpression") {
+        unsafe = "this is not defined";
+        return;
+      }
+
+      if (type === "AssignmentExpression") {
+        unsafe = "assignment is not allowed in template string";
+        return;
+      }
+
+      if (
+        path.node.type === "VariableDeclaration" ||
+        path.node.type === "FunctionDeclaration"
+      ) {
+        unsafe = true;
+      } else if (path.node.type === "Identifier" && unsafeMethods.indexOf(path.node.name) != -1) {
+        unsafe = `${path.node.name} is not defined`;
+      }
+    },
+  });
 
   // check for semicolons
   if (expression.includes(";")) {
@@ -138,43 +182,26 @@ export const replaceString = (
     throw new Error("assignment is not allowed in template string");
   }
 
-  const accessedVariableNames: string[] = [];
+  if (unsafe) {
+    return silentOrThrow(typeof unsafe === "string" ? unsafe : "unsafe operation is not allowed in template string");
+  } else {
+    try {      
+      const result = new Function(
+        "view",
+        /* js */ `
+          const tagged = ( ${allowedVariables.join(", ")} ) => ${expression}
+          return tagged(...Object.values(view))
+        `,
+      )(view);
 
-  withoutStrings
-    .replace(/!==|===|==|!=|>=|<=|\+|-|\//g, " ")
-    .split(/\s+|[()]/)
-    .forEach((x) => {
-      if (!x) {
-        return;
+      if (typeof result === "function") {
+        return silentOrThrow("function is not allowed in template string");
       }
-      const match = x.match(/^([a-zA-Z_$][\w$]*)/g)?.[0];
-      if (match) {
-        accessedVariableNames.push(match);
-      }
-    });
 
-  const allowedVariables = Object.keys(view);
-
-  const functionParams = extractCallbackParams(expression);
-
-  let notAllowedVariables = accessedVariableNames.filter(
-    (x) => !allowedVariables.includes(x) && !whitelistNamespaces.includes(x) && !functionParams.includes(x),
-  );
-
-  if (notAllowedVariables.length) {
-    return silentOrThrow(`${notAllowedVariables.join(", ")} is not defined`);
-  }
-
-  try {
-    return new Function(
-      "view",
-      /* js */ `
-        const tagged = ( ${allowedVariables.join(", ")} ) => ${expression}
-        return tagged(...Object.values(view))
-      `,
-    )(view);
-  } catch (err: any) {
-    return silentOrThrow(err);
+      return result;
+    } catch (err: any) {
+      return silentOrThrow(err);
+    }
   }
 };
 
