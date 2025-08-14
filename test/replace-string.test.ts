@@ -1,6 +1,16 @@
 import { replaceStringMustache, replaceString, replaceStringEjs } from "../src";
 
 describe("replace-string.test.ts", () => {
+  it("simple values", () => {
+    expect(replaceString("{{true}}", {})).toBe(true);
+    expect(replaceString("{{false}}", {})).toBe(false);
+    expect(replaceString("{{null}}", {})).toBe(null);
+    expect(replaceString("{{undefined}}", {})).toBe(undefined);
+    expect(replaceString("{{'test'}}", {})).toBe("test");
+    expect(replaceString("{{1}}", {})).toBe(1);
+    expect(replaceString("{{0}}", {})).toBe(0);
+  });
+
   it("should replace template string that does not start with {{", () => {
     expect(
       replaceString(" {{name}}", {
@@ -268,7 +278,7 @@ describe("replace-string.test.ts", () => {
 
     // https://stackoverflow.com/questions/2132348/what-does-char-160-mean-in-my-source-code
     expect(replaceString(template, context)).toStrictEqual(`0,00${String.fromCharCode(160)}€`);
-  })
+  });
 
   describe("reserved keywords", () => {
     it("should throw with 'arguments'", () => {
