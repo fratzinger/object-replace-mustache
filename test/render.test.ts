@@ -56,4 +56,17 @@ describe("render.test.ts", () => {
       }),
     ).toStrictEqual("Hello 1!");
   });
+
+  it("replaces nullable with empty string", () => {
+    expect(render("{{ undefined }}", {})).toStrictEqual("");
+    expect(render("{{ null }}", {})).toStrictEqual("");
+  });
+
+  it("can format the result", () => {
+    const template = "{{ value }}";
+    const context = { value: 1234.56 };
+    const format = (value: any) => `${value.toFixed(2)}€`;
+
+    expect(render(template, context, { format })).toStrictEqual("1234.56€");
+  });
 });
