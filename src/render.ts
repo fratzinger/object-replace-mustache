@@ -29,7 +29,7 @@ export const render = (
     (m) => {
       let result = replaceString(m, view, {
         handleError: options?.handleError ?? "ignore",
-        delimiters: options?.delimiters ?? ["{{", "}}"],
+        delimiters: options?.delimiters,
       }) as string
 
       if (options?.format) {

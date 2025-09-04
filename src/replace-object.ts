@@ -31,7 +31,7 @@ const recursiveReplace = <T>(
 ): any => {
   if (typeof item === "string") {
     return replaceString(item, view, {
-      delimiters: options?.delimiters ?? ["{{", "}}"],
+      delimiters: options?.delimiters,
       handleError: options?.handleError ?? "ignore",
     });
   } else if (isPlainObject(item)) {
