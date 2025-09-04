@@ -213,6 +213,20 @@ describe("replace-string.test.ts", () => {
     ).toBe(true);
   });
 
+  it("should work with optional chaining", () => {
+    expect(
+      replaceString("{{ nested?.deep?.object }}", {
+        nested: { deep: { object: "value" } },
+      }),
+    ).toBe("value");
+
+    expect(
+      replaceString("{{ nested?.deep?.object }}", {
+        nested: { deep: undefined },
+      }),
+    ).toBeUndefined();
+  });
+
   it("should work with typeof", () => {
     expect(
       replaceString("{{typeof name}}", {

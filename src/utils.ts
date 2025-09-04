@@ -5,6 +5,8 @@ function escape(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }
 
+export const delimitersMustache: [string, string] = ["{{", "}}"];
+
 export const regexForDelimiters = (
   delimiters: [string, string],
   flags?: string,

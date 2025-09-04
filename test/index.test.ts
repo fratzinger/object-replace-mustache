@@ -6,12 +6,13 @@ describe("index", function () {
     assert.deepStrictEqual(
       members,
       [
+        "delimiters",
+        "isTemplateString",
+        "render",
         "replace",
         "replaceString",
-        "delimiters",
-        "render",
-        "replaceStringMustache",
         "replaceStringEjs",
+        "replaceStringMustache",
       ].sort(),
     );
   });

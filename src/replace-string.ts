@@ -1,7 +1,7 @@
 // shamelessly taken from https://github.com/vuejs/core/blob/main/packages/compiler-core/src/validateExpression.ts
 // these keywords should not appear inside expressions, but operators like
 
-import { regexForDelimiters } from "./utils";
+import { delimitersMustache, regexForDelimiters } from "./utils";
 import { parse } from "@babel/parser";
 import _traverse from "@babel/traverse";
 
@@ -75,24 +75,13 @@ const defineReplaceTemplateString =
     (template: string, view = {}) =>
       replaceString(template, view, options);
 
-const callbackParamsRegex = /(?:\(([^)]*)\)|\s*(\w+))\s*=>/;
-
-function extractCallbackParams(functionString: string) {
-  const match = functionString.match(callbackParamsRegex);
-  return match 
-    ? (match[1] 
-        ? match[1].split(',').map(param => param.trim().replace(/^\(|\)$/g, '')).filter(Boolean)
-        : [match[2]])
-    : [];
-}
-
 export const replaceString = (
   template: string,
   view = {},
   options?: ReplaceTemplateStringOptions,
 ): unknown => {
   const expression = regexForDelimiters(
-    options?.delimiters ?? ["{{", "}}"],
+    options?.delimiters ?? delimitersMustache,
   ).exec(template)?.[1];
 
   if (!expression) {
@@ -126,7 +115,7 @@ export const replaceString = (
 
   const ast = parse(expression);
 
-  if (ast.errors.length) {
+  if (ast.errors?.length) {
     return silentOrThrow(ast.errors[0].reasonCode);
   }
 
