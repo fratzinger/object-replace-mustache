@@ -44,12 +44,9 @@
     "lint": "eslint \"{src,test}/**/*{.js,.ts}\" --ext .js,.ts"
   },
   "dependencies": {
-    "@babel/parser": "^7.28.3",
-    "@babel/traverse": "^7.28.3"
+    "meriyah": "^6.1.4"
   },
   "devDependencies": {
-    "@types/babel__traverse": "^7.28.0",
-    "@types/lodash": "^4.17.20",
     "@types/node": "^24.3.0",
     "@typescript-eslint/eslint-plugin": "^6.20.0",
     "@typescript-eslint/parser": "^6.20.0",

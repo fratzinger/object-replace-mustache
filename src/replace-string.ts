@@ -2,10 +2,32 @@
 // these keywords should not appear inside expressions, but operators like
 
 import { delimitersMustache, regexForDelimiters } from "./utils";
-import { parse } from "@babel/parser";
-import _traverse from "@babel/traverse";
+import { parseScript } from "meriyah";
 
-const traverse: typeof _traverse = typeof _traverse === "function" ? _traverse : (_traverse as any).default;
+// Simple AST traversal function
+function traverseAST(
+  node: any,
+  visitor: (node: any) => boolean | void
+): void {
+  if (!node || typeof node !== "object") return;
+
+  // Call visitor, if it returns true, stop traversal
+  if (visitor(node) === true) return;
+
+  // Recursively traverse all properties
+  for (const key in node) {
+    if (key === "type" || key === "loc" || key === "range") continue;
+    const value = node[key];
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        traverseAST(item, visitor);
+      }
+    } else if (value && typeof value === "object") {
+      traverseAST(value, visitor);
+    }
+  }
+}
 
 // https://astexplorer.net/
 
@@ -113,40 +135,41 @@ export const replaceString = (
     throw new Error(`${keywordMatch} is not allowed in template string`);
   }
 
-  const ast = parse(expression);
-
-  if (ast.errors?.length) {
-    return silentOrThrow(ast.errors[0].reasonCode);
+  let ast;
+  try {
+    ast = parseScript(expression);
+  } catch (err: any) {
+    return silentOrThrow(err.message || "Failed to parse expression");
   }
 
   let unsafe: string | boolean = false;
-  traverse(ast, {
-    enter(path) {
-      if (unsafe) {
-        return;
-      }
+  traverseAST(ast, (node) => {
+    if (unsafe) {
+      return true; // Stop traversal
+    }
 
-      const type = path.node.type;
+    const type = node.type;
 
-      if (type === "ThisExpression") {
-        unsafe = "this is not defined";
-        return;
-      }
+    if (type === "ThisExpression") {
+      unsafe = "this is not defined";
+      return true;
+    }
 
-      if (type === "AssignmentExpression") {
-        unsafe = "assignment is not allowed in template string";
-        return;
-      }
+    if (type === "AssignmentExpression") {
+      unsafe = "assignment is not allowed in template string";
+      return true;
+    }
 
-      if (
-        path.node.type === "VariableDeclaration" ||
-        path.node.type === "FunctionDeclaration"
-      ) {
-        unsafe = true;
-      } else if (path.node.type === "Identifier" && unsafeMethods.indexOf(path.node.name) != -1) {
-        unsafe = `${path.node.name} is not defined`;
-      }
-    },
+    if (
+      node.type === "VariableDeclaration" ||
+      node.type === "FunctionDeclaration"
+    ) {
+      unsafe = true;
+      return true;
+    } else if (node.type === "Identifier" && unsafeMethods.indexOf(node.name) != -1) {
+      unsafe = `${node.name} is not defined`;
+      return true;
+    }
   });
 
   // check for semicolons
