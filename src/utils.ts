@@ -1,5 +1,5 @@
 export const isPlainObject = (value: any): value is Record<string, any> =>
-  value && [undefined, Object].includes(value.constructor);
+  !!value && [undefined, Object].includes(value.constructor);
 
 function escape(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string

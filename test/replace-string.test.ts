@@ -411,4 +411,143 @@ describe("replace-string.test.ts", () => {
       expect(replaceStringEjs("<%= name %>", { name: "world" })).toBe("world");
     });
   });
+
+  describe("security - blocked globals", () => {
+    it("should block 'window' access", () => {
+      expect(() => replaceString("{{window}}", {})).toThrowError(
+        "window is not defined",
+      );
+    });
+
+    it("should block 'document' access", () => {
+      expect(() => replaceString("{{document}}", {})).toThrowError(
+        "document is not defined",
+      );
+    });
+
+    it("should block 'global' access", () => {
+      expect(() => replaceString("{{global}}", {})).toThrowError(
+        "global is not defined",
+      );
+    });
+
+    it("should block 'process' access", () => {
+      expect(() => replaceString("{{process}}", {})).toThrowError(
+        "process is not defined",
+      );
+    });
+
+    it("should block 'require' access", () => {
+      expect(() => replaceString("{{require}}", {})).toThrowError(
+        "require is not defined",
+      );
+    });
+
+    it("should block 'module' access", () => {
+      expect(() => replaceString("{{module}}", {})).toThrowError(
+        "module is not defined",
+      );
+    });
+
+    it("should block 'exports' access", () => {
+      expect(() => replaceString("{{exports}}", {})).toThrowError(
+        "exports is not defined",
+      );
+    });
+
+    it("should block 'self' access", () => {
+      expect(() => replaceString("{{self}}", {})).toThrowError(
+        "self is not defined",
+      );
+    });
+
+    it("should block 'globalThis' access", () => {
+      expect(() => replaceString("{{globalThis}}", {})).toThrowError(
+        "globalThis is not defined",
+      );
+    });
+
+    it("should block 'eval' access", () => {
+      expect(() => replaceString("{{eval}}", {})).toThrowError(
+        "eval is not defined",
+      );
+    });
+
+    it("should block 'Function' constructor access", () => {
+      expect(() => replaceString("{{Function}}", {})).toThrowError(
+        "function is not allowed in template string",
+      );
+    });
+
+    it("should block property access on blocked globals", () => {
+      expect(() => replaceString("{{process.env}}", {})).toThrowError();
+      expect(() => replaceString("{{window.location}}", {})).toThrowError();
+    });
+  });
+
+  describe("security - AST-based blocking", () => {
+    it("should block variable declarations", () => {
+      expect(() => replaceString("{{var x = 1}}", {})).toThrowError();
+    });
+
+    it("should block let declarations", () => {
+      expect(() => replaceString("{{let x = 1}}", {})).toThrowError();
+    });
+
+    it("should block const declarations", () => {
+      expect(() => replaceString("{{const x = 1}}", {})).toThrowError();
+    });
+
+    it("should block function declarations", () => {
+      expect(() => replaceString("{{function foo() {}}}", {})).toThrowError();
+    });
+
+    it("should allow arrow functions in expressions", () => {
+      expect(replaceString("{{[1,2,3].map(x => x * 2)}}", {})).toStrictEqual([
+        2, 4, 6,
+      ]);
+    });
+  });
+
+  describe("expression edge cases", () => {
+    it("should handle bitwise left shift", () => {
+      expect(replaceString("{{a << 2}}", { a: 1 })).toBe(4);
+    });
+
+    it("should handle bitwise right shift", () => {
+      expect(replaceString("{{a >> 1}}", { a: 8 })).toBe(4);
+    });
+
+    it("should handle unsigned right shift", () => {
+      expect(replaceString("{{a >>> 1}}", { a: 8 })).toBe(4);
+    });
+
+    it("should handle multiple consecutive operations", () => {
+      expect(replaceString("{{a + b - c * d / e}}", { a: 10, b: 5, c: 2, d: 3, e: 2 })).toBe(12);
+    });
+
+    it("should handle nested ternary operators", () => {
+      expect(replaceString("{{a ? b ? 'yes' : 'maybe' : 'no'}}", { a: true, b: false })).toBe("maybe");
+    });
+
+    it("should handle complex optional chaining", () => {
+      expect(
+        replaceString("{{a?.b?.c?.d?.e}}", {
+          a: { b: { c: { d: { e: "deep" } } } },
+        }),
+      ).toBe("deep");
+    });
+
+    it("should handle spread operator in arrays", () => {
+      expect(replaceString("{{[...arr]}}", { arr: [1, 2, 3] })).toStrictEqual([
+        1, 2, 3,
+      ]);
+    });
+
+    it("should handle spread with multiple arrays", () => {
+      expect(
+        replaceString("{{[...a, ...b]}}", { a: [1, 2], b: [3, 4] }),
+      ).toStrictEqual([1, 2, 3, 4]);
+    });
+  });
 });

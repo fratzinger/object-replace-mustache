@@ -37,11 +37,11 @@ const recursiveReplace = <T>(
   } else if (isPlainObject(item)) {
     const result: Record<string, any> = {};
     for (const key in item) {
-      result[key] = recursiveReplace(item[key], view);
+      result[key] = recursiveReplace(item[key], view, options);
     }
     return result;
   } else if (Array.isArray(item)) {
-    return [...item.map((subItem) => recursiveReplace(subItem, view))];
+    return [...item.map((subItem) => recursiveReplace(subItem, view, options))];
   }
 
   return item;
