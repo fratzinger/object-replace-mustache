@@ -39,7 +39,7 @@
     "test": "vitest run",
     "vitest": "vitest",
     "coverage": "vitest run --coverage",
-    "lint": "eslint \"{src,test}/**/*{.js,.ts}\" --ext .js,.ts"
+    "lint": "eslint"
   },
   "dependencies": {
     "meriyah": "^6.1.4"
