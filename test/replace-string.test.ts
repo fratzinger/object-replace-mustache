@@ -582,5 +582,39 @@ describe('replace-string.test.ts', () => {
         replaceString('{{[...a, ...b]}}', { a: [1, 2], b: [3, 4] }),
       ).toStrictEqual([1, 2, 3, 4])
     })
+
+    it('should handle concatentation of strings and variables', () => {
+      expect(
+        replaceString("{{'Hello, ' + name + '!'}}", { name: 'Alice' }),
+      ).toBe('Hello, Alice!')
+    })
+
+    it('should handle concatentation of strings and variables with fallback', () => {
+      expect(
+        replaceString(
+          "{{ (_.get(data, scope)?.amount ?? '') + ' ' + (_.get(data, scope)?.unit ?? '') }}",
+          {
+            _: {
+              get: (obj: any, path: string) => {
+                const keys = path.split('.')
+                let result = obj
+                for (const key of keys) {
+                  result = result?.[key]
+                }
+                return result
+              },
+            },
+            data: { ctx: { amount: 5, unit: 'kg' } },
+            scope: 'ctx',
+          },
+        ),
+      ).toBe('5 kg')
+    })
+
+    it('should handle template strings within expressions', () => {
+      expect(replaceString('{{`Value is: ${value}`}}', { value: 42 })).toBe(
+        'Value is: 42',
+      )
+    })
   })
 })
