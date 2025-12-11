@@ -86,9 +86,44 @@ export const replaceString = (
     return template
   }
 
-  // throw with nested expression
-  if (expression.match(/\${.*?}/)) {
-    throw new Error('nested expression is not allowed in template string')
+  // Check for invalid nested expressions (${} outside of template literals)
+  // Template literals start with backtick, but invalid usage like 'a' + ${} should be caught
+  const hasInvalidNestedExpr = expression.match(/\${/)
+  if (hasInvalidNestedExpr) {
+    // Check if all ${ are within valid template literals (backtick strings)
+    // Valid: `text ${expr}` or `${expr}`
+    // Invalid: 'text' + ${expr} or any ${ not in a backtick string
+    let isValid = true
+    let inTemplate = false
+    let escaped = false
+
+    for (let i = 0; i < expression.length; i++) {
+      const char = expression[i]
+      const next = expression[i + 1]
+
+      if (escaped) {
+        escaped = false
+        continue
+      }
+
+      if (char === '\\') {
+        escaped = true
+        continue
+      }
+
+      if (char === '`') {
+        inTemplate = !inTemplate
+      }
+
+      if (char === '$' && next === '{' && !inTemplate) {
+        isValid = false
+        break
+      }
+    }
+
+    if (!isValid) {
+      throw new Error('nested expression is not allowed in template string')
+    }
   }
 
   const withoutStrings = expression.replace(stripStringRE, '')
