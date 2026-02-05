@@ -149,6 +149,36 @@ describe('replace-string.test.ts', () => {
         'function',
       )
     })
+
+    it('compare two variables', () => {
+      expect(replaceString('{{a !== b}}', { a: 3, b: '3' })).toBe(true)
+      expect(replaceString('{{a === b}}', { a: 3, b: 3 })).toBe(true)
+    })
+
+    it('compares two nested variables', () => {
+      expect(
+        replaceString('{{a.value !== b.value}}', {
+          a: { value: 3 },
+          b: { value: '3' },
+        }),
+      ).toBe(true)
+
+      expect(
+        replaceString('{{a.value === b.value}}', {
+          a: { value: 3 },
+          b: { value: 3 },
+        }),
+      ).toBe(true)
+    })
+
+    it('compares two nested variables with fallback', () => {
+      expect(
+        replaceString('{{a.value === (b.value ?? 3)}}', {
+          a: { value: 3 },
+          b: {},
+        }),
+      ).toBe(true)
+    })
   })
 
   it('should work with expressions', () => {
@@ -297,6 +327,16 @@ describe('replace-string.test.ts', () => {
     expect(
       replaceString('{{a.filter(x => x>1)}}', { a: [1, 2, 3] }),
     ).toStrictEqual([2, 3])
+  })
+
+  it("negation '!'", () => {
+    expect(replaceString('{{!isActive}}', { isActive: false })).toBe(true)
+    expect(replaceString('{{!isActive}}', { isActive: true })).toBe(false)
+  })
+
+  it("double negation '!!'", () => {
+    expect(replaceString('{{!!value}}', { value: 'test' })).toBe(true)
+    expect(replaceString('{{!!value}}', { value: '' })).toBe(false)
   })
 
   it('_.numberFormat', () => {
@@ -615,6 +655,28 @@ describe('replace-string.test.ts', () => {
       expect(replaceString('{{`Value is: ${value}`}}', { value: 42 })).toBe(
         'Value is: 42',
       )
+    })
+
+    it('should handle template strings within expressions with fallback', () => {
+      expect(
+        replaceString(
+          "{{ `${_.get(data, scope)?.amount ?? ''} ${_.get(data, scope)?.unit ?? 'kg'}` }}",
+          {
+            _: {
+              get: (obj: any, path: string) => {
+                const keys = path.split('.')
+                let result = obj
+                for (const key of keys) {
+                  result = result?.[key]
+                }
+                return result
+              },
+            },
+            data: { ctx: { amount: 5 } },
+            scope: 'ctx',
+          },
+        ),
+      ).toBe('5 kg')
     })
   })
 })
