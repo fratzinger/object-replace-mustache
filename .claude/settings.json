@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vitest run)",
+      "Bash(npx tsdown)",
+      "Bash(pnpm bench)",
+      "Bash(npx vitest run *)",
+      "Bash(npx eslint *)",
+      "Bash(pnpm coverage)"
+    ]
+  }
+}

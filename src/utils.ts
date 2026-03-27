@@ -10,9 +10,8 @@ export const delimitersMustache: [string, string] = ['{{', '}}']
 export const regexForDelimiters = (
   delimiters: [string, string],
   flags?: string,
+  anchored = true,
 ) => {
-  return new RegExp(
-    `^${escape(delimiters[0])}(.*?)${escape(delimiters[1])}$`,
-    flags,
-  )
+  const pattern = `${escape(delimiters[0])}(.*?)${escape(delimiters[1])}`
+  return new RegExp(anchored ? `^${pattern}$` : pattern, flags)
 }

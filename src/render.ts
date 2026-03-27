@@ -1,4 +1,5 @@
 import { replaceString } from './replace-string'
+import { delimitersMustache, regexForDelimiters } from './utils'
 
 export type RenderOptions = {
   /**
@@ -23,11 +24,14 @@ export const render = (
   str: string,
   view: Record<string, any>,
   options?: RenderOptions,
-) =>
-  str.replace(/\{\{(.*?)\}\}/g, (m) => {
+) => {
+  const delimiters = options?.delimiters ?? delimitersMustache
+  const pattern = regexForDelimiters(delimiters, 'g', false)
+
+  return str.replace(pattern, (m) => {
     let result = replaceString(m, view, {
       handleError: options?.handleError ?? 'ignore',
-      delimiters: options?.delimiters,
+      delimiters,
     }) as string
 
     if (options?.format) {
@@ -40,3 +44,4 @@ export const render = (
 
     return result
   })
+}
