@@ -13,8 +13,5 @@ export const regexForDelimiters = (
   anchored = true,
 ) => {
   const pattern = `${escape(delimiters[0])}(.*?)${escape(delimiters[1])}`
-  return new RegExp(
-    anchored ? `^${pattern}$` : pattern,
-    flags,
-  )
+  return new RegExp(anchored ? `^${pattern}$` : pattern, flags)
 }

@@ -61,6 +61,7 @@ describe('replace-string.test.ts', () => {
 
   describe('access to variables not defined in view', () => {
     it('should not pass current scope', () => {
+      // eslint-disable-next-line unused-imports/no-unused-vars
       const test1 = 'test'
       expect(() => replaceString('{{test1}}', {})).toThrowError(
         'test1 is not defined',
@@ -145,7 +146,9 @@ describe('replace-string.test.ts', () => {
     })
 
     it('arrow function returns callable', () => {
-      const fn = replaceString('{{() => true}}', { a: 3 }) as Function
+      const fn = replaceString('{{() => true}}', { a: 3 }) as (
+        ...args: any[]
+      ) => unknown
       expect(typeof fn).toBe('function')
       expect(fn()).toBe(true)
     })
@@ -761,13 +764,17 @@ describe('replace-string.test.ts', () => {
     })
 
     it('should allow top-level arrow function as result', () => {
-      const fn = replaceString('{{() => true}}', { a: 3 }) as Function
+      const fn = replaceString('{{() => true}}', { a: 3 }) as (
+        ...args: any[]
+      ) => unknown
       expect(typeof fn).toBe('function')
       expect(fn()).toBe(true)
     })
 
     it('should allow top-level arrow function with params', () => {
-      const fn = replaceString('{{(x) => x * 2}}', {}) as Function
+      const fn = replaceString('{{(x) => x * 2}}', {}) as (
+        ...args: any[]
+      ) => unknown
       expect(typeof fn).toBe('function')
       expect(fn(5)).toBe(10)
     })
@@ -802,6 +809,7 @@ describe('replace-string.test.ts', () => {
     })
 
     it('should not leak scope variables', () => {
+      // eslint-disable-next-line unused-imports/no-unused-vars
       const test1 = 'leaked'
       expect(() => replaceString('{{test1}}', {})).toThrowError(
         'test1 is not defined',
@@ -916,13 +924,12 @@ describe('replace-string.test.ts', () => {
       const forFn = replaceString(
         '{{ () => { for (let i = 0; i < 10; i++) {} return 1; } }}',
         {},
-      ) as Function
+      ) as (...args: any[]) => unknown
       expect(() => forFn()).toThrowError()
 
-      const whileFn = replaceString(
-        '{{ () => { while (true) {} } }}',
-        {},
-      ) as Function
+      const whileFn = replaceString('{{ () => { while (true) {} } }}', {}) as (
+        ...args: any[]
+      ) => unknown
       expect(() => whileFn()).toThrowError()
     })
 
@@ -930,7 +937,7 @@ describe('replace-string.test.ts', () => {
       const fn = replaceString(
         '{{ () => { try { return a.constructor } catch(e) { return "caught" } } }}',
         { a: '' },
-      ) as Function
+      ) as (...args: any[]) => unknown
       expect(() => fn()).toThrowError()
     })
 
@@ -1127,7 +1134,7 @@ describe('replace-string.test.ts', () => {
       const calcDuration = replaceString(
         '{{ (entry) => { const start = new Date(entry.start); const end = new Date(entry.end); if (start.getTime() >= end.getTime()) return 0; return Math.round((end.getTime() - start.getTime()) / 1000); } }}',
         {},
-      ) as Function
+      ) as (...args: any[]) => unknown
 
       expect(typeof calcDuration).toBe('function')
 
@@ -1184,7 +1191,7 @@ describe('replace-string.test.ts', () => {
       const fn = replaceString(
         '{{ (a, b) => { const sum = a + b; const doubled = sum * 2; return doubled; } }}',
         {},
-      ) as Function
+      ) as (...args: any[]) => unknown
       expect(fn(3, 4)).toBe(14)
     })
 
@@ -1192,7 +1199,7 @@ describe('replace-string.test.ts', () => {
       const fn = replaceString(
         "{{ (x) => { if (x > 0) { return 'positive'; } else { return 'non-positive'; } } }}",
         {},
-      ) as Function
+      ) as (...args: any[]) => unknown
       expect(fn(5)).toBe('positive')
       expect(fn(-1)).toBe('non-positive')
     })
@@ -1201,7 +1208,7 @@ describe('replace-string.test.ts', () => {
       const fn = replaceString(
         '{{ (ts) => { const d = new Date(ts); return d.getFullYear(); } }}',
         {},
-      ) as Function
+      ) as (...args: any[]) => unknown
       expect(fn('2024-06-15T00:00:00Z')).toBe(2024)
     })
 

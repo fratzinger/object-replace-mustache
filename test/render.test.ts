@@ -157,13 +157,21 @@ describe('render.test.ts', () => {
   describe('custom delimiters', () => {
     it('should work with EJS-style delimiters', () => {
       expect(
-        render('Hello <%= name %>!', { name: 'world' }, { delimiters: ['<%=', '%>'] }),
+        render(
+          'Hello <%= name %>!',
+          { name: 'world' },
+          { delimiters: ['<%=', '%>'] },
+        ),
       ).toStrictEqual('Hello world!')
     })
 
     it('should replace multiple EJS-style templates', () => {
       expect(
-        render('<%= a %> and <%= b %>', { a: 1, b: 2 }, { delimiters: ['<%=', '%>'] }),
+        render(
+          '<%= a %> and <%= b %>',
+          { a: 1, b: 2 },
+          { delimiters: ['<%=', '%>'] },
+        ),
       ).toStrictEqual('1 and 2')
     })
 

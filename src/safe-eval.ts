@@ -52,8 +52,18 @@ const ALLOWED_GLOBALS: Record<string, unknown> = {
 }
 
 const ALLOWED_CONSTRUCTORS = new Set([
-  Date, Array, Map, Set, RegExp, Error, TypeError, RangeError,
-  Object, Number, String, Boolean,
+  Date,
+  Array,
+  Map,
+  Set,
+  RegExp,
+  Error,
+  TypeError,
+  RangeError,
+  Object,
+  Number,
+  String,
+  Boolean,
 ])
 
 const MAX_DEPTH = 256
@@ -102,7 +112,10 @@ function evaluateNode(node: any, scope: Scope, ctx: EvalContext): unknown {
 function evaluateNodeInner(node: any, scope: Scope, ctx: EvalContext): unknown {
   switch (node.type) {
     case 'Program': {
-      if (node.body.length !== 1 || node.body[0].type !== 'ExpressionStatement') {
+      if (
+        node.body.length !== 1 ||
+        node.body[0].type !== 'ExpressionStatement'
+      ) {
         throw new Error('only single expressions are allowed')
       }
       return evaluateNode(node.body[0], scope, ctx)
@@ -137,7 +150,7 @@ function evaluateNodeInner(node: any, scope: Scope, ctx: EvalContext): unknown {
 
       assertSafeProperty(property as string)
 
-      if (node.optional && (object == null)) {
+      if (node.optional && object == null) {
         return undefined
       }
 
@@ -200,6 +213,7 @@ function evaluateNodeInner(node: any, scope: Scope, ctx: EvalContext): unknown {
       }
 
       const args = evaluateArguments(node.arguments, scope, ctx)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
       const result = (func as Function).apply(thisArg, args)
       assertStringLength(result)
       return result
@@ -218,26 +232,39 @@ function evaluateNodeInner(node: any, scope: Scope, ctx: EvalContext): unknown {
     case 'LogicalExpression': {
       const left = evaluateNode(node.left, scope, ctx)
       switch (node.operator) {
-        case '&&': return left && evaluateNode(node.right, scope, ctx)
-        case '||': return left || evaluateNode(node.right, scope, ctx)
-        case '??': return left ?? evaluateNode(node.right, scope, ctx)
+        case '&&':
+          return left && evaluateNode(node.right, scope, ctx)
+        case '||':
+          return left || evaluateNode(node.right, scope, ctx)
+        case '??':
+          return left ?? evaluateNode(node.right, scope, ctx)
         default:
           throw new Error(`unsupported logical operator: ${node.operator}`)
       }
     }
 
     case 'UnaryExpression': {
-      const argument = node.operator === 'typeof' && node.argument.type === 'Identifier' && !(node.argument.name in scope) && !(node.argument.name in ALLOWED_GLOBALS)
-        ? undefined
-        : evaluateNode(node.argument, scope, ctx)
+      const argument =
+        node.operator === 'typeof' &&
+        node.argument.type === 'Identifier' &&
+        !(node.argument.name in scope) &&
+        !(node.argument.name in ALLOWED_GLOBALS)
+          ? undefined
+          : evaluateNode(node.argument, scope, ctx)
 
       switch (node.operator) {
-        case '!': return !argument
-        case '-': return -(argument as number)
-        case '+': return +(argument as number)
-        case 'typeof': return typeof argument
-        case 'void': return void argument
-        case '~': return ~(argument as number)
+        case '!':
+          return !argument
+        case '-':
+          return -(argument as number)
+        case '+':
+          return +(argument as number)
+        case 'typeof':
+          return typeof argument
+        case 'void':
+          return void argument
+        case '~':
+          return ~(argument as number)
         default:
           throw new Error(`unsupported unary operator: ${node.operator}`)
       }
@@ -258,7 +285,7 @@ function evaluateNodeInner(node: any, scope: Scope, ctx: EvalContext): unknown {
           Object.assign(obj, evaluateNode(prop.argument, scope, ctx))
         } else {
           const key = prop.computed
-            ? evaluateNode(prop.key, scope, ctx) as string
+            ? (evaluateNode(prop.key, scope, ctx) as string)
             : (prop.key.name ?? prop.key.value)
           obj[key] = evaluateNode(prop.value, scope, ctx)
         }
@@ -296,7 +323,10 @@ function evaluateNodeInner(node: any, scope: Scope, ctx: EvalContext): unknown {
 
     case 'NewExpression': {
       const ctor = evaluateNode(node.callee, scope, ctx)
-      if (typeof ctor !== 'function' || !ALLOWED_CONSTRUCTORS.has(ctor as any)) {
+      if (
+        typeof ctor !== 'function' ||
+        !ALLOWED_CONSTRUCTORS.has(ctor as any)
+      ) {
         throw new Error(`'new ${formatCallee(node.callee)}' is not allowed`)
       }
       const args = evaluateArguments(node.arguments, scope, ctx)
@@ -317,13 +347,17 @@ function evaluateNodeInner(node: any, scope: Scope, ctx: EvalContext): unknown {
     case 'VariableDeclaration': {
       for (const declarator of node.declarations) {
         const name = declarator.id.name
-        scope[name] = declarator.init ? evaluateNode(declarator.init, scope, ctx) : undefined
+        scope[name] = declarator.init
+          ? evaluateNode(declarator.init, scope, ctx)
+          : undefined
       }
       return undefined
     }
 
     case 'ReturnStatement':
-      return new ReturnSignal(node.argument ? evaluateNode(node.argument, scope, ctx) : undefined)
+      return new ReturnSignal(
+        node.argument ? evaluateNode(node.argument, scope, ctx) : undefined,
+      )
 
     case 'IfStatement': {
       const test = evaluateNode(node.test, scope, ctx)
@@ -338,9 +372,12 @@ function evaluateNodeInner(node: any, scope: Scope, ctx: EvalContext): unknown {
     }
 
     case 'TaggedTemplateExpression': {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
       const tag = evaluateNode(node.tag, scope, ctx) as Function
       const strings = node.quasi.quasis.map((q: any) => q.value.cooked)
-      const values = node.quasi.expressions.map((e: any) => evaluateNode(e, scope, ctx))
+      const values = node.quasi.expressions.map((e: any) =>
+        evaluateNode(e, scope, ctx),
+      )
       return tag(strings, ...values)
     }
 
@@ -349,11 +386,17 @@ function evaluateNodeInner(node: any, scope: Scope, ctx: EvalContext): unknown {
   }
 }
 
-function createSafeFunction(node: any, parentScope: Scope, ctx: EvalContext): Function {
+function createSafeFunction(
+  node: any,
+  parentScope: Scope,
+  ctx: EvalContext,
+): (...args: unknown[]) => unknown {
   const paramNames = node.params.map((p: any) => {
     if (p.type === 'Identifier') return p.name
-    if (p.type === 'RestElement' && p.argument.type === 'Identifier') return `...${p.argument.name}`
-    if (p.type === 'AssignmentPattern' && p.left.type === 'Identifier') return p.left.name
+    if (p.type === 'RestElement' && p.argument.type === 'Identifier')
+      return `...${p.argument.name}`
+    if (p.type === 'AssignmentPattern' && p.left.type === 'Identifier')
+      return p.left.name
     throw new Error('unsupported parameter type')
   })
 
@@ -366,7 +409,10 @@ function createSafeFunction(node: any, parentScope: Scope, ctx: EvalContext): Fu
       if (param.type === 'RestElement') {
         childScope[param.argument.name] = args.slice(argIdx)
       } else if (param.type === 'AssignmentPattern') {
-        childScope[param.left.name] = argIdx < args.length ? args[argIdx] : evaluateNode(param.right, childScope, ctx)
+        childScope[param.left.name] =
+          argIdx < args.length
+            ? args[argIdx]
+            : evaluateNode(param.right, childScope, ctx)
         argIdx++
       } else {
         childScope[paramNames[i]] = args[argIdx]
@@ -387,7 +433,11 @@ function createSafeFunction(node: any, parentScope: Scope, ctx: EvalContext): Fu
   }
 }
 
-function evaluateArguments(args: any[], scope: Scope, ctx: EvalContext): unknown[] {
+function evaluateArguments(
+  args: any[],
+  scope: Scope,
+  ctx: EvalContext,
+): unknown[] {
   const result: unknown[] = []
   for (const arg of args) {
     if (arg.type === 'SpreadElement') {
@@ -400,7 +450,11 @@ function evaluateArguments(args: any[], scope: Scope, ctx: EvalContext): unknown
   return result
 }
 
-function evaluateArrayElements(elements: any[], scope: Scope, ctx: EvalContext): unknown[] {
+function evaluateArrayElements(
+  elements: any[],
+  scope: Scope,
+  ctx: EvalContext,
+): unknown[] {
   const result: unknown[] = []
   for (const el of elements) {
     if (el === null) {
@@ -417,28 +471,50 @@ function evaluateArrayElements(elements: any[], scope: Scope, ctx: EvalContext):
 
 function evaluateBinary(op: string, left: unknown, right: unknown): unknown {
   switch (op) {
-    case '+': return (left as any) + (right as any)
-    case '-': return (left as any) - (right as any)
-    case '*': return (left as any) * (right as any)
-    case '/': return (left as any) / (right as any)
-    case '%': return (left as any) % (right as any)
-    case '**': return (left as any) ** (right as any)
-    case '==': return (left as any) == (right as any)
-    case '!=': return (left as any) != (right as any)
-    case '===': return left === right
-    case '!==': return left !== right
-    case '<': return (left as any) < (right as any)
-    case '>': return (left as any) > (right as any)
-    case '<=': return (left as any) <= (right as any)
-    case '>=': return (left as any) >= (right as any)
-    case '<<': return (left as any) << (right as any)
-    case '>>': return (left as any) >> (right as any)
-    case '>>>': return (left as any) >>> (right as any)
-    case '&': return (left as any) & (right as any)
-    case '|': return (left as any) | (right as any)
-    case '^': return (left as any) ^ (right as any)
-    case 'in': return (left as any) in (right as any)
-    case 'instanceof': return (left as any) instanceof (right as any)
+    case '+':
+      return (left as any) + (right as any)
+    case '-':
+      return (left as any) - (right as any)
+    case '*':
+      return (left as any) * (right as any)
+    case '/':
+      return (left as any) / (right as any)
+    case '%':
+      return (left as any) % (right as any)
+    case '**':
+      return (left as any) ** (right as any)
+    case '==':
+      return (left as any) == (right as any)
+    case '!=':
+      return (left as any) != (right as any)
+    case '===':
+      return left === right
+    case '!==':
+      return left !== right
+    case '<':
+      return (left as any) < (right as any)
+    case '>':
+      return (left as any) > (right as any)
+    case '<=':
+      return (left as any) <= (right as any)
+    case '>=':
+      return (left as any) >= (right as any)
+    case '<<':
+      return (left as any) << (right as any)
+    case '>>':
+      return (left as any) >> (right as any)
+    case '>>>':
+      return (left as any) >>> (right as any)
+    case '&':
+      return (left as any) & (right as any)
+    case '|':
+      return (left as any) | (right as any)
+    case '^':
+      return (left as any) ^ (right as any)
+    case 'in':
+      return (left as any) in (right as any)
+    case 'instanceof':
+      return (left as any) instanceof (right as any)
     default:
       throw new Error(`unsupported binary operator: ${op}`)
   }
