@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vitest run --reporter=verbose)",
+      "Bash(npx vitest run)",
+      "Bash(npx tsdown)",
+      "Bash(pnpm bench)"
+    ]
+  }
+}

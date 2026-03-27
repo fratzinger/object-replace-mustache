@@ -39,20 +39,28 @@
     "test": "vitest run",
     "vitest": "vitest",
     "coverage": "vitest run --coverage",
-    "lint": "eslint"
+    "lint": "eslint",
+    "bench": "tsx bench/index.ts"
   },
   "dependencies": {
     "meriyah": "^6.1.4"
   },
   "devDependencies": {
     "@feathers-community/eslint-config": "^0.0.9",
+    "@types/ejs": "^3.1.5",
+    "@types/mustache": "^4.2.6",
     "@types/node": "^24.10.0",
     "@vitest/coverage-v8": "^4.0.7",
+    "ejs": "^5.0.1",
     "eslint": "^9.39.1",
+    "handlebars": "^4.7.9",
+    "mustache": "^4.2.0",
     "np": "^10.2.0",
     "pkg-pr-new": "^0.0.60",
     "shx": "^0.4.0",
+    "tinybench": "^6.0.0",
     "tsdown": "^0.16.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.7"
   }

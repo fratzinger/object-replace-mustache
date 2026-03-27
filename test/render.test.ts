@@ -153,4 +153,38 @@ describe('render.test.ts', () => {
       }).toThrow()
     })
   })
+
+  describe('custom delimiters', () => {
+    it('should work with EJS-style delimiters', () => {
+      expect(
+        render('Hello <%= name %>!', { name: 'world' }, { delimiters: ['<%=', '%>'] }),
+      ).toStrictEqual('Hello world!')
+    })
+
+    it('should replace multiple EJS-style templates', () => {
+      expect(
+        render('<%= a %> and <%= b %>', { a: 1, b: 2 }, { delimiters: ['<%=', '%>'] }),
+      ).toStrictEqual('1 and 2')
+    })
+
+    it('should not match mustache delimiters when using EJS', () => {
+      expect(
+        render(
+          '{{ a }} and <%= b %>',
+          { a: 1, b: 2 },
+          { delimiters: ['<%=', '%>'] },
+        ),
+      ).toStrictEqual('{{ a }} and 2')
+    })
+
+    it('should work with custom delimiters and expressions', () => {
+      expect(
+        render(
+          'Result: <%= a + b %>',
+          { a: 3, b: 4 },
+          { delimiters: ['<%=', '%>'] },
+        ),
+      ).toStrictEqual('Result: 7')
+    })
+  })
 })
