@@ -1129,6 +1129,173 @@ describe('replace-string.test.ts', () => {
     })
   })
 
+  describe('coverage - additional branches', () => {
+    it('template literal with ${} inside backticks is valid', () => {
+      // Covers the inTemplate branch in the ${} validator
+      expect(replaceString('{{ `hello ${name}` }}', { name: 'world' })).toBe(
+        'hello world',
+      )
+    })
+
+    it('computed method call on object', () => {
+      // Covers callee.computed branch in CallExpression
+      const obj = { greet: () => 'hello' }
+      expect(replaceString("{{ obj['greet']() }}", { obj })).toBe('hello')
+    })
+
+    it('optional call on null function', () => {
+      // Covers node.optional && func == null in CallExpression
+      expect(replaceString('{{ fn?.() }}', { fn: null })).toBeUndefined()
+    })
+
+    it('call on null object method', () => {
+      // Covers thisArg == null in CallExpression MemberExpression path
+      expect(() => replaceString('{{ a.foo() }}', { a: null })).toThrowError(
+        "Cannot read properties of null (reading 'foo')",
+      )
+    })
+
+    it('tagged template literal', () => {
+      // Covers TaggedTemplateExpression branch
+      const tag = (strings: string[], ...values: any[]) =>
+        strings.reduce((r, s, i) => r + s + (values[i] ?? ''), '')
+      expect(
+        replaceString('{{ tag`hello ${name}` }}', { tag, name: 'world' }),
+      ).toBe('hello world')
+    })
+
+    it('arrow function with rest parameter', () => {
+      // Covers RestElement branch in createSafeFunction
+      const fn = replaceString('{{ (...args) => args.length }}', {}) as (
+        ...args: any[]
+      ) => unknown
+      expect(fn(1, 2, 3)).toBe(3)
+    })
+
+    it('arrow function with default parameter', () => {
+      // Covers AssignmentPattern branch in createSafeFunction
+      const fn = replaceString('{{ (a, b = 10) => a + b }}', {}) as (
+        ...args: any[]
+      ) => unknown
+      expect(fn(5)).toBe(15)
+      expect(fn(5, 20)).toBe(25)
+    })
+
+    it('spread in function arguments', () => {
+      // Covers SpreadElement in evaluateArguments
+      expect(replaceString('{{ Math.max(...arr) }}', { arr: [1, 5, 3] })).toBe(
+        5,
+      )
+    })
+
+    it('sparse array elements', () => {
+      // Covers el === null in evaluateArrayElements (holey arrays)
+
+      expect(replaceString('{{ [1,,3] }}', {})).toStrictEqual([1, undefined, 3])
+    })
+
+    it('bitwise operators coverage', () => {
+      // Covers &, |, ^ branches
+      expect(replaceString('{{ a & b }}', { a: 0b1100, b: 0b1010 })).toBe(
+        0b1000,
+      )
+      expect(replaceString('{{ a | b }}', { a: 0b1100, b: 0b1010 })).toBe(
+        0b1110,
+      )
+      expect(replaceString('{{ a ^ b }}', { a: 0b1100, b: 0b1010 })).toBe(
+        0b0110,
+      )
+    })
+
+    it('modulo and exponent operators', () => {
+      // Covers % and ** branches
+      expect(replaceString('{{ a % b }}', { a: 7, b: 3 })).toBe(1)
+      expect(replaceString('{{ a ** b }}', { a: 2, b: 3 })).toBe(8)
+    })
+
+    it('logical || and ?? operators', () => {
+      // Covers || and ?? branches in LogicalExpression
+      expect(replaceString('{{ a || b }}', { a: false, b: 'fallback' })).toBe(
+        'fallback',
+      )
+      expect(replaceString('{{ a ?? b }}', { a: null, b: 'default' })).toBe(
+        'default',
+      )
+    })
+
+    it('unary +, void, ~ operators', () => {
+      // Covers +, void, ~ branches in UnaryExpression
+      expect(replaceString("{{ +'42' }}", {})).toBe(42)
+      expect(replaceString('{{ void 0 }}', {})).toBeUndefined()
+      expect(replaceString('{{ ~0 }}', {})).toBe(-1)
+    })
+
+    it('typeof on undefined variable', () => {
+      // Covers the typeof special case for undefined identifiers
+      expect(replaceString('{{ typeof missing }}', {})).toBe('undefined')
+    })
+
+    it('object with computed key', () => {
+      // Covers prop.computed branch in ObjectExpression
+      expect(
+        replaceString('{{ ({ [key]: 42 }) }}', { key: 'x' }),
+      ).toStrictEqual({ x: 42 })
+    })
+
+    it('object with spread', () => {
+      // Covers SpreadElement in ObjectExpression
+      expect(
+        replaceString('{{ ({ ...a, x: 1 }) }}', { a: { y: 2 } }),
+      ).toStrictEqual({ y: 2, x: 1 })
+    })
+
+    it('variable declaration without initializer', () => {
+      // Covers declarator.init falsy branch
+      const fn = replaceString(
+        '{{ () => { const x = undefined; return x; } }}',
+        {},
+      ) as (...args: any[]) => unknown
+      expect(fn()).toBeUndefined()
+    })
+
+    it('if statement without else', () => {
+      // Covers node.alternate falsy in IfStatement
+      const fn = replaceString(
+        "{{ (x) => { if (x > 0) { return 'yes'; } return 'no'; } }}",
+        {},
+      ) as (...args: any[]) => unknown
+      expect(fn(1)).toBe('yes')
+      expect(fn(-1)).toBe('no')
+    })
+
+    it('return without argument', () => {
+      // Covers node.argument falsy in ReturnStatement
+      const fn = replaceString('{{ () => { return; } }}', {}) as (
+        ...args: any[]
+      ) => unknown
+      expect(fn()).toBeUndefined()
+    })
+
+    it('formatCallee with computed member', () => {
+      // Covers computed branch in formatCallee and non-function error
+      expect(() =>
+        replaceString('{{ obj["notAFn"]() }}', { obj: { notAFn: 42 } }),
+      ).toThrowError('is not a function')
+    })
+
+    it('new with blocked constructor', () => {
+      // Covers ALLOWED_CONSTRUCTORS check failing
+      expect(() =>
+        replaceString('{{ new WeakMap() }}', { WeakMap }),
+      ).toThrowError("'new WeakMap' is not allowed")
+    })
+
+    it('member expression property from literal value', () => {
+      // Covers (node.property as any).value path for non-computed members
+      expect(replaceString('{{ a[0] }}', { a: ['first'] })).toBe('first')
+    })
+  })
+
   describe('block body arrow functions', () => {
     it('calcDuration - block body with const, new Date, if/return', () => {
       const calcDuration = replaceString(
